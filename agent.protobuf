@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package nestrkeyagent;
+
+option go_package = "nestr-key-agent/lib/proto";
+
+service KeyAgent {
+  rpc StoreKey (StoreKeyRequest) returns (StoreKeyResponse) {}
+  rpc RetrieveKey (RetrieveKeyRequest) returns (RetrieveKeyResponse) {}
+}
+
+message StoreKeyRequest {
+  string keyName = 1;
+  string privateKey = 2;
+  string passphrase = 3;
+}
+
+message StoreKeyResponse {
+  bool success = 1;
+}
+
+message RetrieveKeyRequest {
+  string keyName = 1;
+  string passphrase = 2;
+}
+
+message RetrieveKeyResponse {
+  string privateKey = 1;
+}
