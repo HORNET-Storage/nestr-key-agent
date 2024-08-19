@@ -161,10 +161,7 @@ func (ka *KeyAgent) decryptKey(encryptedKey []byte, passphrase string) (*secp256
 		return nil, err
 	}
 
-	privateKey, _, err := signing.DeserializePrivateKey(string(keyBytes))
-	if err != nil {
-		return nil, err
-	}
+	privateKey := secp256k1.PrivKeyFromBytes(keyBytes)
 
 	return privateKey, nil
 }
@@ -175,12 +172,25 @@ func (ka *KeyAgent) SaveKeyStore() error {
 		return err
 	}
 
-	keyStorePath := filepath.Join(os.Getenv("HOME"), ".gitnestr", "keystore.json")
+	home := os.Getenv("HOME")
+	if home == "" {
+		home = os.Getenv("USERPROFILE")
+	}
+
+	keyStorePath := filepath.Join(home, ".gitnestr", "keystore.json")
+
+	fmt.Printf("Attempting to save key store to: %s\n", keyStorePath)
+
 	return os.WriteFile(keyStorePath, data, 0600)
 }
 
 func (ka *KeyAgent) LoadKeyStore() error {
-	keyStorePath := filepath.Join(os.Getenv("HOME"), ".gitnestr", "keystore.json")
+	home := os.Getenv("HOME")
+	if home == "" {
+		home = os.Getenv("USERPROFILE")
+	}
+
+	keyStorePath := filepath.Join(home, ".gitnestr", "keystore.json")
 	data, err := os.ReadFile(keyStorePath)
 	if err != nil {
 		if os.IsNotExist(err) {
