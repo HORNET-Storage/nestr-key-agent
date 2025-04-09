@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/HORNET-Storage/go-hornet-storage-lib/lib/signing"
 	"github.com/HORNET-Storage/nestr-key-agent/lib/proto"
 
-	"github.com/HORNET-Storage/hornet-storage/lib/signing"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
 	"golang.org/x/crypto/scrypt"
 )
@@ -32,7 +32,7 @@ func NewKeyAgent() *KeyAgent {
 	return &KeyAgent{
 		keyStore:     make(map[string][]byte),
 		keyCache:     make(map[string]*secp256k1.PrivateKey),
-		cacheTimeout: 15 * time.Minute,
+		cacheTimeout: 72 * time.Hour,
 	}
 }
 
@@ -177,9 +177,13 @@ func (ka *KeyAgent) SaveKeyStore() error {
 		home = os.Getenv("USERPROFILE")
 	}
 
-	keyStorePath := filepath.Join(home, ".gitnestr", "keystore.json")
+	dirPath := filepath.Join(home, ".gitnestr")
+	// Ensure the directory exists
+	if err := os.MkdirAll(dirPath, 0700); err != nil {
+		return fmt.Errorf("failed to create directory: %v", err)
+	}
 
-	fmt.Printf("Attempting to save key store to: %s\n", keyStorePath)
+	keyStorePath := filepath.Join(dirPath, "keystore.json")
 
 	return os.WriteFile(keyStorePath, data, 0600)
 }
@@ -190,7 +194,8 @@ func (ka *KeyAgent) LoadKeyStore() error {
 		home = os.Getenv("USERPROFILE")
 	}
 
-	keyStorePath := filepath.Join(home, ".gitnestr", "keystore.json")
+	dirPath := filepath.Join(home, ".gitnestr")
+	keyStorePath := filepath.Join(dirPath, "keystore.json")
 	data, err := os.ReadFile(keyStorePath)
 	if err != nil {
 		if os.IsNotExist(err) {
