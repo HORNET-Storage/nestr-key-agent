@@ -2,10 +2,8 @@ module github.com/HORNET-Storage/nestr-key-agent
 
 go 1.22.1
 
-replace github.com/HORNET-Storage/go-hornet-storage-lib => ../go-hornet-storage-lib
-
 require (
-	github.com/HORNET-Storage/go-hornet-storage-lib v0.0.0-20250310130615-f4b83d0723b6
+	github.com/HORNET-Storage/go-hornet-storage-lib v0.0.0-20250410002150-60b72f8f2859
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0
 	golang.org/x/crypto v0.24.0
 	golang.org/x/sys v0.21.0
