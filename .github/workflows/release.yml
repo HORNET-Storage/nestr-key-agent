@@ -48,9 +48,9 @@ jobs:
         shell: pwsh
         run: |
           # Download and install SimpleSC for service management
-          Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/4/4a/SimpleSC.zip" -OutFile "SimpleSC.zip"
+          Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/e/ef/NSIS_Simple_Service_Plugin_Unicode_1.30.zip" -OutFile "SimpleSC.zip"
           Expand-Archive -Path "SimpleSC.zip" -DestinationPath "SimpleSC_temp"
-          Copy-Item "SimpleSC_temp\Unicode\Plugins\SimpleSC.dll" -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\" -Force
+          Copy-Item "SimpleSC_temp\SimpleSC.dll" -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\" -Force
           
           # Download and install EnVar plugin for PATH management
           Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip" -OutFile "EnVar_plugin.zip"
