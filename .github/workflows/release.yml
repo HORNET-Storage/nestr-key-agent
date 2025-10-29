@@ -31,11 +31,6 @@ jobs:
           cd services/generic
           go build -o ../../keyagent.exe -ldflags "-s -w" .
           cd ../..
-          
-          # Build CLI tool
-          cd cmd/keyagent-cli
-          go build -o ../../keyagent-cli.exe -ldflags "-s -w" .
-          cd ../..
         env:
           GOOS: windows
           GOARCH: amd64
@@ -65,7 +60,6 @@ jobs:
       - name: Copy files for NSIS
         run: |
           Copy-Item keyagent.exe scripts/
-          Copy-Item keyagent-cli.exe scripts/
           Copy-Item LICENSE scripts/
           Copy-Item README.md scripts/
           Copy-Item agent.protobuf scripts/

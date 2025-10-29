@@ -91,7 +91,6 @@ Section "NestrKeyAgent" SEC01
   
   ; Install binaries
   File "keyagent.exe"
-  File "keyagent-cli.exe"
   File "README.md"
   File "LICENSE"
   File "agent.protobuf"
@@ -150,7 +149,6 @@ Section "NestrKeyAgent" SEC01
   
   ; Create Start Menu shortcuts
   CreateDirectory "$SMPROGRAMS\Nestr Key Agent"
-  CreateShortcut "$SMPROGRAMS\Nestr Key Agent\Key Agent CLI.lnk" "cmd.exe" '/k "$INSTDIR\keyagent-cli.exe"'
   CreateShortcut "$SMPROGRAMS\Nestr Key Agent\Start Service.lnk" "net" 'start "${SERVICE_NAME}"' "" "" SW_SHOWNORMAL "" "Start Nestr Key Agent Service"
   CreateShortcut "$SMPROGRAMS\Nestr Key Agent\Stop Service.lnk" "net" 'stop "${SERVICE_NAME}"' "" "" SW_SHOWNORMAL "" "Stop Nestr Key Agent Service"
   CreateShortcut "$SMPROGRAMS\Nestr Key Agent\Restart Service.lnk" "cmd.exe" '/c net stop "${SERVICE_NAME}" && net start "${SERVICE_NAME}"' "" "" SW_SHOWNORMAL "" "Restart Nestr Key Agent Service"
@@ -159,7 +157,7 @@ Section "NestrKeyAgent" SEC01
   ; Notify system of PATH change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   
-  MessageBox MB_OK "Installation complete!$\r$\n$\r$\nNestr Key Agent has been installed as a Windows service.$\r$\n$\r$\nYou can manage the service from the Start Menu or use 'keyagent-cli' from the command line."
+  MessageBox MB_OK "Installation complete!$\r$\n$\r$\nNestr Key Agent has been installed as a Windows service.$\r$\n$\r$\nYou can manage the service from the Start Menu."
 SectionEnd
 
 ; Function to start the service
@@ -202,7 +200,6 @@ Section Uninstall
   
   ; Delete files
   Delete "$INSTDIR\keyagent.exe"
-  Delete "$INSTDIR\keyagent-cli.exe"
   Delete "$INSTDIR\README.md"
   Delete "$INSTDIR\LICENSE"
   Delete "$INSTDIR\agent.protobuf"
