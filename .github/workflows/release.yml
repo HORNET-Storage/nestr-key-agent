@@ -39,19 +39,19 @@ jobs:
       - name: Install NSIS
         run: |
           choco install nsis -y
-          
+
       - name: Add NSIS to PATH
         shell: pwsh
         run: echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          
+
       - name: Install NSIS Plugins
         shell: pwsh
         run: |
           # Download and install SimpleSC for service management
-          Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/4/4a/SimpleSC.zip" -OutFile "SimpleSC.zip"
+          Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/e/ef/NSIS_Simple_Service_Plugin_Unicode_1.30.zip" -OutFile "SimpleSC.zip"
           Expand-Archive -Path "SimpleSC.zip" -DestinationPath "SimpleSC_temp"
-          Copy-Item "SimpleSC_temp\Unicode\Plugins\SimpleSC.dll" -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\" -Force
-          
+          Copy-Item "SimpleSC_temp\SimpleSC.dll" -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\" -Force
+
           # Download and install EnVar plugin for PATH management
           Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip" -OutFile "EnVar_plugin.zip"
           Expand-Archive -Path "EnVar_plugin.zip" -DestinationPath "EnVar_temp"
@@ -90,12 +90,6 @@ jobs:
         with:
           go-version: '1.22.1'
 
-      - name: Download NSIS installer
-        uses: actions/download-artifact@v4
-        with:
-          name: keyagent-windows-installer
-          path: dist/
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -104,6 +98,12 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download NSIS installer
+        uses: actions/download-artifact@v4
+        with:
+          name: keyagent-windows-installer
+          path: dist/
 
       - name: Upload Windows installer to release
         uses: softprops/action-gh-release@v1
