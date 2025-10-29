@@ -1,0 +1,26 @@
+[Unit]
+Description=Nestr Key Agent
+Documentation=https://github.com/HORNET-Storage/nestr-key-agent
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/keyagent
+Restart=on-failure
+RestartSec=5s
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/nestr-key-agent
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=keyagent
+
+[Install]
+WantedBy=multi-user.target

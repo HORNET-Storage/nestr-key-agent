@@ -1,5 +1,5 @@
-github.com/HORNET-Storage/go-hornet-storage-lib v0.0.0-20250310130615-f4b83d0723b6 h1:rs8K/tQiBXAHNHcfefFIpxmpJQ4rAL9/KxZltjVvWks=
-github.com/HORNET-Storage/go-hornet-storage-lib v0.0.0-20250310130615-f4b83d0723b6/go.mod h1:BwY0Xa34UnRTiNIDP0jRkkAlrNGR7yyo2KdVFdkfxTc=
+github.com/HORNET-Storage/go-hornet-storage-lib v0.0.0-20251027082313-77b506a0232d h1:z1GAzJlRT+Re2jJn0hpOZqDXoCf6mth2MmO+arNmYik=
+github.com/HORNET-Storage/go-hornet-storage-lib v0.0.0-20251027082313-77b506a0232d/go.mod h1:SGt8mqoTj7x8POEgQPv1ruF0fUh8oOpw0Z+G+x/YnA8=
 github.com/aead/siphash v1.0.1/go.mod h1:Nywa3cDsYNNK3gaciGTWPwHt0wlpNV15vwmswBAUSII=
 github.com/btcsuite/btcd v0.20.1-beta/go.mod h1:wVuoA8VJLEcwgqHBwHmzLRazpKxTv13Px/pDuV7OomQ=
 github.com/btcsuite/btcd v0.22.0-beta.0.20220111032746-97732e52810c/go.mod h1:tjmYdS6MLJ5/s0Fj4DbLgSbDHbEqLJrtnHecBFkdz5M=
