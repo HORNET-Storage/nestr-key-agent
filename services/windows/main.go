@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 	"os"
@@ -14,65 +15,95 @@ import (
 	"github.com/HORNET-Storage/nestr-key-agent/lib/service"
 )
 
-type keyAgentService struct{}
+type keyAgentService struct {
+	server     *grpc.Server
+	stopServer context.CancelFunc
+}
 
 func (m *keyAgentService) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
 	changes <- svc.Status{State: svc.StartPending}
 
-	go runKeyAgent()
+	// Start the key agent in background
+	ctx, cancel := context.WithCancel(context.Background())
+	m.stopServer = cancel
+
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- m.runKeyAgent(ctx)
+	}()
 
 	changes <- svc.Status{State: svc.Running, Accepts: svc.AcceptStop | svc.AcceptShutdown}
 
-	for c := range r {
-		switch c.Cmd {
-		case svc.Interrogate:
-			changes <- c.CurrentStatus
-		case svc.Stop, svc.Shutdown:
-			changes <- svc.Status{State: svc.StopPending}
-			// Perform any cleanup or shutdown operations here
-			return
-		default:
-			log.Printf("unexpected control request #%d", c)
+	for {
+		select {
+		case c := <-r:
+			switch c.Cmd {
+			case svc.Interrogate:
+				changes <- c.CurrentStatus
+			case svc.Stop, svc.Shutdown:
+				changes <- svc.Status{State: svc.StopPending}
+
+				// Gracefully stop the server
+				if m.stopServer != nil {
+					m.stopServer()
+				}
+				if m.server != nil {
+					m.server.GracefulStop()
+				}
+
+				changes <- svc.Status{State: svc.Stopped}
+				return false, 0
+			default:
+				log.Printf("unexpected control request #%d", c)
+			}
+		case err := <-errChan:
+			if err != nil {
+				log.Printf("Key Agent error: %v", err)
+				changes <- svc.Status{State: svc.Stopped}
+				return true, 1
+			}
+			return false, 0
 		}
 	}
-
-	return
 }
 
-func runKeyAgent() {
+func (m *keyAgentService) runKeyAgent(ctx context.Context) error {
 	lis, err := net.Listen("tcp", "localhost:50051")
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return err
 	}
 
 	ka := service.NewKeyAgent()
 	err = ka.LoadKeyStore()
 	if err != nil {
-		log.Fatalf("failed to load key store: %v", err)
+		return err
 	}
 
-	s := grpc.NewServer()
-	proto.RegisterKeyAgentServer(s, ka)
+	m.server = grpc.NewServer()
+	proto.RegisterKeyAgentServer(m.server, ka)
+
+	go func() {
+		<-ctx.Done()
+		m.server.GracefulStop()
+	}()
 
 	log.Println("Key Agent is running on localhost:50051")
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	return m.server.Serve(lis)
 }
 
 func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "install":
-			installService("KeyAgentService", "Git Key Agent Service")
+			installService("NestrKeyAgent", "Nestr Key Agent")
 			return
 		case "remove":
-			removeService("KeyAgentService")
+			removeService("NestrKeyAgent")
 			return
 		}
 	}
 
-	err := svc.Run("KeyAgentService", &keyAgentService{})
+	err := svc.Run("NestrKeyAgent", &keyAgentService{})
 	if err != nil {
 		log.Fatalf("Service failed: %v", err)
 	}

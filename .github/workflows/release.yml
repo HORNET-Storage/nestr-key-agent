@@ -28,7 +28,7 @@ jobs:
       - name: Build Windows executables
         run: |
           # Build key agent service
-          cd services/generic
+          cd services/windows
           go build -o ../../keyagent.exe -ldflags "-s -w" .
           cd ../..
         env:
