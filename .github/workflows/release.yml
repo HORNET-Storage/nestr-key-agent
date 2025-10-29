@@ -48,7 +48,7 @@ jobs:
         shell: pwsh
         run: |
           # Download and install SimpleSC for service management
-          Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/6/6c/SimpleSC.zip" -OutFile "SimpleSC.zip"
+          Invoke-WebRequest -Uri "https://nsis.sourceforge.io/mediawiki/images/4/4a/SimpleSC.zip" -OutFile "SimpleSC.zip"
           Expand-Archive -Path "SimpleSC.zip" -DestinationPath "SimpleSC_temp"
           Copy-Item "SimpleSC_temp\Unicode\Plugins\SimpleSC.dll" -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode\" -Force
           
