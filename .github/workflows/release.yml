@@ -11,6 +11,81 @@ permissions:
   packages: write
 
 jobs:
+  build-macos-pkg:
+    name: Build macOS PKG Installer
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.1'
+
+      - name: Build binary for ${{ matrix.arch }}
+        run: |
+          cd services/generic
+          GOOS=darwin GOARCH=${{ matrix.arch }} go build -o ../../keyagent -ldflags "-s -w" .
+          cd ../..
+          chmod +x keyagent
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="0.0.0"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create package structure
+        run: |
+          # Create directory structure for pkgbuild
+          mkdir -p pkg-root/usr/local/bin
+          mkdir -p pkg-root/Library/LaunchDaemons
+          mkdir -p pkg-root/usr/local/share/nestr-key-agent
+          mkdir -p pkg-scripts
+
+          # Copy binary
+          cp keyagent pkg-root/usr/local/bin/
+          chmod 755 pkg-root/usr/local/bin/keyagent
+
+          # Copy launchd plist
+          cp packaging/macos/com.hornetstorage.nestr-key-agent.plist pkg-root/Library/LaunchDaemons/
+          chmod 644 pkg-root/Library/LaunchDaemons/com.hornetstorage.nestr-key-agent.plist
+
+          # Copy documentation
+          cp LICENSE README.md pkg-root/usr/local/share/nestr-key-agent/
+
+          # Copy scripts
+          cp packaging/macos/postinstall.sh pkg-scripts/postinstall
+          cp packaging/macos/preremove.sh pkg-scripts/preinstall
+          chmod +x pkg-scripts/*
+
+      - name: Build PKG installer
+        run: |
+          # Build the package
+          pkgbuild \
+            --root pkg-root \
+            --scripts pkg-scripts \
+            --identifier com.hornetstorage.nestr-key-agent \
+            --version ${{ steps.get_version.outputs.VERSION }} \
+            --install-location / \
+            NestrKeyAgent-${{ steps.get_version.outputs.VERSION }}-darwin-${{ matrix.arch }}.pkg
+
+      - name: Upload PKG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: keyagent-macos-pkg-${{ matrix.arch }}
+          path: NestrKeyAgent-*.pkg
+
   build-nsis-installer:
     name: Build Windows NSIS Installer
     runs-on: windows-latest
@@ -78,7 +153,9 @@ jobs:
   goreleaser:
     name: Build and Release with GoReleaser
     runs-on: ubuntu-latest
-    needs: build-nsis-installer
+    needs:
+      - build-macos-pkg
+      - build-nsis-installer
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -105,11 +182,19 @@ jobs:
           name: keyagent-windows-installer
           path: dist/
 
-      - name: Upload Windows installer to release
+      - name: Download macOS PKG installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: keyagent-macos-pkg-*
+          path: dist/
+          merge-multiple: true
+
+      - name: Upload installers to release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             dist/NestrKeyAgent-Setup.exe
+            dist/NestrKeyAgent-*.pkg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
