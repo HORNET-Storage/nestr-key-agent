@@ -8,7 +8,7 @@ Nestr Key Agent is a secure and efficient solution for storing and retrieving cr
 - **Cross-Platform Support**: Runs as a background service on Windows, macOS, and Linux.
 - **gRPC Interface**: Provides a modern, efficient gRPC API for key management operations.
 - **Caching Mechanism**: Implements a secure, time-limited caching system to balance security and performance.
-- **Language Support**: 
+- **Language Support**:
   - Go implementation available out-of-the-box.
   - TypeScript implementation coming soon (will be linked here when available).
 
@@ -23,28 +23,27 @@ Nestr Key Agent is a secure and efficient solution for storing and retrieving cr
 - In-memory caching is time-limited to reduce exposure.
 
 ## Installation
-*The following is just an outline and is not currently accurate, will be updated before release*
+
+### macOS (One-Line Install) ✨
+
+```bash
+curl -sSL https://raw.githubusercontent.com/HORNET-Storage/nestr-key-agent/main/scripts/install-macos-quick.sh | sudo bash
+```
+
+This will automatically:
+- Download the latest release
+- Install the binary to `/usr/local/bin`
+- Set up a launchd service that starts automatically
+- Start the service immediately
 
 ### Windows
 
-1. Build the project:
-go build
-2. Install as a service:
-nestr-key-agent.exe install
+Download the installer from the [Releases](https://github.com/HORNET-Storage/nestr-key-agent/releases) page and run `NestrKeyAgent-Setup.exe`.
 
-### macOS
-
-1. Build the project:
-go build
-2. Run the installation script:
-./install_mac.sh
-
-### Linux
-
-1. Build the project:
-go build
-2. Run the installation script:
-./install.sh
+The installer will:
+- Install the key agent binary
+- Set up a Windows service
+- Start the service automatically
 
 ## Usage
 
